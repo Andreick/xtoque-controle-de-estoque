@@ -1,7 +1,8 @@
 import 'dotenv/config';
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
-import helloRouter from './routers/helloRouter';
+import productRouter from './routers/ProductRouter';
+import seedRouter from './routers/SeedRouter';
 
 class App {
   public express: express.Application;
@@ -16,6 +17,11 @@ class App {
   private middleware() {
     this.express.use(express.json());
     this.express.use(express.urlencoded({ extended: true }));
+    this.express.use(
+      (err: Error, req: Request, res: Response, next: NextFunction) => {
+        res.status(500).send({ message: err.message });
+      }
+    );
   }
 
   private database() {
@@ -30,7 +36,8 @@ class App {
   }
 
   private router() {
-    this.express.use('/api/hello', helloRouter);
+    this.express.use('/api/products', productRouter);
+    this.express.use('/api/seed', seedRouter);
   }
 }
 
