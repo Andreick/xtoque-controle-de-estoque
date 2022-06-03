@@ -2,6 +2,7 @@ import { Container, Nav, Navbar } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
+import ProductListScreen from './screens/ProductListScreen';
 import ProductScreen from './screens/ProductScreen';
 import StockScreen from './screens/StockScreen';
 
@@ -31,7 +32,9 @@ function App() {
           <Container className="mt-3">
             <Routes>
               <Route path="/" element={<StockScreen />}></Route>
-              <Route path="/products" element={<ProductScreen />}></Route>
+              <Route path="/products" element={<ProductListScreen />}></Route>
+              <Route path="/new/product" element={<ProductScreen />}></Route>
+              <Route path="/products/:id" element={<ProductScreen />}></Route>
             </Routes>
           </Container>
         </main>

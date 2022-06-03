@@ -7,7 +7,7 @@ export interface IProduct {
 
 const productSchema = new Schema<IProduct>(
   {
-    name: { type: String, required: true, unique: true },
+    name: { type: String, required: true },
     price: { type: Number, required: true },
   },
   {

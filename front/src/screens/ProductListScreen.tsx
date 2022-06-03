@@ -1,22 +1,21 @@
 import { Helmet } from 'react-helmet-async';
-import { Alert } from 'react-bootstrap';
+import { Alert, Button, Table } from 'react-bootstrap';
 import Product from '../interfaces/Product';
 import { useEffect, useReducer } from 'react';
 import axios from 'axios';
 import getError from '../utils/ErrorUtils';
 import LoadingBox from '../components/LoadingBox';
-import { useParams } from 'react-router-dom';
-import ProductForm from '../components/ProductForm';
+import { useNavigate } from 'react-router-dom';
 
 const initialState = {
-  product: undefined as Product | undefined,
+  products: Array<Product>(),
   loading: false,
   error: '',
 };
 
 type FetchProductsAction =
   | { type: 'FETCH_REQUEST' }
-  | { type: 'FETCH_SUCCESS'; payload: Product }
+  | { type: 'FETCH_SUCCESS'; payload: Product[] }
   | { type: 'FETCH_FAIL'; payload: string };
 
 const reducer = (state: typeof initialState, action: FetchProductsAction) => {
@@ -24,33 +23,36 @@ const reducer = (state: typeof initialState, action: FetchProductsAction) => {
     case 'FETCH_REQUEST':
       return { ...state, loading: true, error: '' };
     case 'FETCH_SUCCESS':
-      return { ...state, product: action.payload, loading: false };
+      return { ...state, products: action.payload, loading: false };
     case 'FETCH_FAIL':
       return { ...state, loading: false, error: action.payload };
   }
 };
 
-export default function ProductScreen() {
-  const { id } = useParams();
+export default function ProductListScreen() {
+  const navigate = useNavigate();
 
-  const [{ loading, error, product }, dispatch] = useReducer(
+  const [{ loading, error, products }, dispatch] = useReducer(
     reducer,
     initialState
   );
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!id) return;
       dispatch({ type: 'FETCH_REQUEST' });
       try {
-        const { data } = await axios.get(`/api/products/${id}`);
+        const { data } = await axios.get('/api/products');
         dispatch({ type: 'FETCH_SUCCESS', payload: data });
       } catch (err) {
         dispatch({ type: 'FETCH_FAIL', payload: getError(err) });
       }
     };
     fetchData();
-  }, [id]);
+  }, []);
+
+  const navigateToProduct = (id: string) => navigate(`/products/${id}`);
+
+  const addProduct = () => navigate(`/new/product`);
 
   return (
     <div>
@@ -63,7 +65,30 @@ export default function ProductScreen() {
       ) : error ? (
         <Alert variant="danger">{error}</Alert>
       ) : (
-        <ProductForm product={product} />
+        <div>
+          <Table striped bordered hover>
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Preço</th>
+              </tr>
+            </thead>
+            <tbody>
+              {products.map((product) => (
+                <tr
+                  key={product._id}
+                  onClick={() => navigateToProduct(product._id)}
+                >
+                  <td>{product.name}</td>
+                  <td>{product.price}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+          <Button variant="outline-success" onClick={addProduct}>
+            Adicionar Produto
+          </Button>
+        </div>
       )}
     </div>
   );
